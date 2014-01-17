@@ -1,0 +1,19 @@
+{
+  "name": "btc-blockchain",
+  "version": "0.1.0",
+  "description": "Manage a Bitcoin blockchain",
+  "keywords": [
+    "bitcoin",
+    "cryptography"
+  ],
+  "main": "./lib/BTCBlockchain.js",
+  "dependencies": {
+    "btc-p2p": "0.1.x",
+    "async": "0.2.x"
+  },
+  "repository": {
+    "url": "https://github.com/cryptocoinjs/btc-blockchain",
+    "type": "git"
+  },
+  "author": "Brooks Boyd <boydb@midnightdesign.ws>"
+}
