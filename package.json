@@ -9,6 +9,7 @@
   "main": "./lib/BTCBlockchain.js",
   "dependencies": {
     "btc-p2p": "0.1.x",
+    "crypto-hashing": "0.1.x",
     "async": "0.2.x",
     "leveldown": "0.10.x"
   },
