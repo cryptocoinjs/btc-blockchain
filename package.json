@@ -11,7 +11,8 @@
     "btc-p2p": "0.1.x",
     "crypto-hashing": "0.1.x",
     "async": "0.2.x",
-    "leveldown": "0.10.x"
+    "leveldown": "0.10.x",
+    "levelup": "0.18.x"
   },
   "repository": {
     "url": "https://github.com/cryptocoinjs/btc-blockchain",
