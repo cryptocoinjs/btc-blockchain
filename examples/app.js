@@ -1,3 +1,4 @@
+/*jslint node: true */
 var BTCBlockchain = require('../lib/BTCBlockchain.js').BTCBlockchain;
 var async = require('async');
 
@@ -11,20 +12,21 @@ bc.on('launched', function() {
       console.log(err);
       return;
     }
+
     async.waterfall([
-      function(cb) {
-        bc.addBlock(
-          new Buffer('0000000000000000000000000000000000000000000000000000000000000001', 'hex'),
-          new Buffer('0000000000000000000000000000000000000000000000000000000000000000', 'hex'),
-          new Buffer('bar1', 'ascii'),
-          cb
-        );
-      },
       function(cb) {
         bc.addBlock(
           new Buffer('0000000000000000000000000000000000000000000000000000000000000002', 'hex'),
           new Buffer('0000000000000000000000000000000000000000000000000000000000000001', 'hex'),
           new Buffer('bar2', 'ascii'),
+          cb
+        );
+      },
+      function(cb) {
+        bc.addBlock(
+          new Buffer('0000000000000000000000000000000000000000000000000000000000000001', 'hex'),
+          new Buffer('0000000000000000000000000000000000000000000000000000000000000000', 'hex'),
+          new Buffer('bar1', 'ascii'),
           cb
         );
       },
@@ -54,17 +56,32 @@ bc.on('launched', function() {
       }
     ], function(err) {
       if (err) console.log(err);
+
+      console.log('');
+      walkTree();
     });
   });
 });
 
+var walkTree = function() {
+  bc.getTips(function(tips) {
+    console.log('There are '+tips.length+' tips in the tree');
+    async.eachSeries(tips, function(block, cb) {
+      bc.getBlock(block, function(err, block) {
+        console.log(block.data.toString('ascii'), block);
+        cb();
+      });
+    });
+  });
+};
+
 var counter = 0;
 bc.on('blockAdded', function(d) {
-  console.log(d.data.toString('ascii'), d);
+  console.log('Block Added:', d.data.toString('ascii'), d);
   counter++;
 });
 
 bc.launch(function(err, rs) {
-  if (err == null) return; // Successful launch
+  if (err === null) return; // Successful launch
   console.log(err, rs);
 });
