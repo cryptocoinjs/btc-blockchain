@@ -3,7 +3,9 @@
 var BTCBlockchain = require('../lib/BTCBlockchain.js');
 var async = require('async');
 
-var bc = new BTCBlockchain();
+var bc = new BTCBlockchain({
+  dataDir: __dirname
+});
 
 bc.on('launched', function() {
   console.log("Blockchain done launching");
@@ -59,29 +61,32 @@ bc.on('launched', function() {
       if (err) console.log('ERROR: '+err);
 
       console.log('');
-      walkTree();
+      walkTree(function() {
+        console.log('');
+        testDelete();
+      });
     });
   });
 });
 
-var walkTree = function() {
+var walkTree = function(cb) {
   bc.getTips(function(tips) {
     console.log('There are '+tips.length+' tips in the tree');
-    async.eachSeries(tips, function(block, cb) {
+    async.eachSeries(tips, function(block, cbEach) {
       bc.getBlock(block, function(err, block) {
         if (err !== null) {
-          console.log("ERROR: "+err);
+          cbEach(err);
           return;
         }
         walkBranch(block, function(err) {
           if (err !== null) {
-            console.log("ERROR: "+err);
+            cbEach(err);
             return;
           }
-          cb();
+          cbEach(null);
         });
       });
-    });
+    }, cb);
   });
 };
 
@@ -103,6 +108,23 @@ var walkBranch = function(block, cb) {
     }
     process.stdout.write(' > ');
     walkBranch(parentBlock, cb);
+  });
+};
+
+var testDelete = function() {
+  console.log('Deleting bar2...');
+  bc.deleteBlock(new Buffer('0000000000000000000000000000000000000000000000000000000000000002', 'hex'), false, function(err) {
+    if (err !== null) {
+      console.log('ERROR: '+err);
+      return;
+    }
+    console.log('Deleted');
+    walkTree(function(err) {
+      if (err !== null) {
+        console.log('ERROR: '+err);
+        return;
+      }
+    });
   });
 };
 
