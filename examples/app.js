@@ -1,5 +1,6 @@
 /*jslint node: true */
-var BTCBlockchain = require('../lib/BTCBlockchain.js').BTCBlockchain;
+'use strict';
+var BTCBlockchain = require('../lib/BTCBlockchain.js');
 var async = require('async');
 
 var bc = new BTCBlockchain();
@@ -9,7 +10,7 @@ bc.on('launched', function() {
   bc.purge(function(err) {
     console.log('Starting test');
     if (err != null) {
-      console.log(err);
+      console.log('ERROR: '+err);
       return;
     }
 
@@ -55,7 +56,7 @@ bc.on('launched', function() {
         );
       }
     ], function(err) {
-      if (err) console.log(err);
+      if (err) console.log('ERROR: '+err);
 
       console.log('');
       walkTree();
@@ -68,10 +69,40 @@ var walkTree = function() {
     console.log('There are '+tips.length+' tips in the tree');
     async.eachSeries(tips, function(block, cb) {
       bc.getBlock(block, function(err, block) {
-        console.log(block.data.toString('ascii'), block);
-        cb();
+        if (err !== null) {
+          console.log("ERROR: "+err);
+          return;
+        }
+        walkBranch(block, function(err) {
+          if (err !== null) {
+            console.log("ERROR: "+err);
+            return;
+          }
+          cb();
+        });
       });
     });
+  });
+};
+
+var walkBranch = function(block, cb) {
+  process.stdout.write(block.data.toString('ascii') + ' ('+block.height+')');
+  if (block.height === 0) {
+    process.stdout.write("\n");
+    cb(null); // Reached root
+    return;
+  }
+  bc.getBlock(block.parent, function(err, parentBlock) {
+    if (err !== null) {
+      cb(err);
+      return;
+    }
+    if (parentBlock === false) {
+      cb("Missing parent?");
+      return;
+    }
+    process.stdout.write(' > ');
+    walkBranch(parentBlock, cb);
   });
 };
 
@@ -83,5 +114,5 @@ bc.on('blockAdded', function(d) {
 
 bc.launch(function(err, rs) {
   if (err === null) return; // Successful launch
-  console.log(err, rs);
+  console.log('ERROR: '+err, rs);
 });
