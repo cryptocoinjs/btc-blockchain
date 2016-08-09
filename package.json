@@ -12,7 +12,7 @@
     "crypto-hashing": "0.1.x",
     "async": "0.2.x",
     "leveldown": "0.10.x",
-    "levelup": "0.18.x"
+    "levelup": "0.19.1"
   },
   "repository": {
     "url": "https://github.com/cryptocoinjs/btc-blockchain",
